@@ -9,7 +9,8 @@ import type { Problem, ProblemProgress } from '../types';
 import { cn } from '../utils/cn';
 import { relativeDay, topicName } from '../utils/stats';
 import { DifficultyBadge } from './DifficultyBadge';
-import { REVISION_INTERVALS, StatusSelect } from './StatusSelect';
+import { AttemptToggle, REVISION_INTERVALS } from './AttemptToggle';
+import { getProblemLinks } from '../utils/problemLinks';
 
 type Draft = Record<WorkspaceField, string>;
 
@@ -176,8 +177,8 @@ function DrawerBody({ problem, onClose }: { problem: Problem; onClose: () => voi
           </button>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <div className="w-44">
-            <StatusSelect problemId={problem.id} block />
+          <div className="min-w-[220px] flex-1 sm:flex-none sm:w-56">
+            <AttemptToggle problemId={problem.id} block />
           </div>
           <button
             type="button"
@@ -187,9 +188,13 @@ function DrawerBody({ problem, onClose }: { problem: Problem; onClose: () => voi
             {progress.bookmarked ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
             {progress.bookmarked ? 'Bookmarked' : 'Bookmark'}
           </button>
-          <a href={problem.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-            Open problem <ExternalLink size={13} />
-          </a>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {getProblemLinks(problem, draft.solutionLink || progress.solutionLink).map((link) => (
+            <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="btn btn-sm">
+              {link.label} <ExternalLink size={12} />
+            </a>
+          ))}
         </div>
       </header>
 

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Download, FileSpreadsheet, Moon, Sun, Trash2, Upload } from 'lucide-react';
+import { Download, FileSpreadsheet, Link2, Moon, RefreshCw, Sun, Trash2, Upload } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { PageHeader } from '../components/PageHeader';
 import { useProgress } from '../context/ProgressContext';
 import { cn } from '../utils/cn';
@@ -24,11 +25,12 @@ function Section({ title, description, children }: { title: string; description?
 }
 
 export function Settings() {
-  const { data, progress, settings, updateSettings, resetProgress, importData } = useProgress();
+  const { data, progress, settings, updateSettings, resetProgress, importData, syncLeetCode, leetcodeSyncing } = useProgress();
   const fileRef = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState<Notice>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [pendingImport, setPendingImport] = useState<{ data: Parameters<typeof importData>[0]; count: number; name: string } | null>(null);
+  const [lcUser, setLcUser] = useState(settings.leetcodeUsername);
 
   const numberField = (key: 'dailyTarget' | 'weeklyTarget', label: string) => (
     <div>
@@ -107,6 +109,64 @@ export function Settings() {
             {numberField('dailyTarget', 'Daily target (problems)')}
             {numberField('weeklyTarget', 'Weekly target (problems)')}
           </div>
+        </Section>
+
+        <Section
+          title="LeetCode sync"
+          description="Link your public LeetCode username. Solved problems in this catalog are marked Solved automatically. Manual status is only Attempted / Unattempted."
+        >
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="min-w-[200px] flex-1">
+              <label className="label" htmlFor="lc-user">
+                LeetCode username
+              </label>
+              <input
+                id="lc-user"
+                className="input mono"
+                placeholder="your-leetcode-handle"
+                value={lcUser}
+                onChange={(e) => setLcUser(e.target.value)}
+                onBlur={() => updateSettings({ leetcodeUsername: lcUser.trim().replace(/^@/, '') })}
+              />
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={leetcodeSyncing}
+              onClick={() => {
+                const name = lcUser.trim().replace(/^@/, '');
+                updateSettings({ leetcodeUsername: name });
+                void syncLeetCode(name).then((r) => setNotice({ tone: r.ok ? 'ok' : 'error', text: r.message }));
+              }}
+            >
+              <RefreshCw size={14} className={leetcodeSyncing ? 'animate-spin' : undefined} />
+              {leetcodeSyncing ? 'Syncing…' : 'Sync now'}
+            </button>
+            <a
+              href={lcUser.trim() ? `https://leetcode.com/u/${encodeURIComponent(lcUser.trim().replace(/^@/, ''))}/` : 'https://leetcode.com/'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn"
+            >
+              <Link2 size={14} /> Profile
+            </a>
+          </div>
+          <label className="flex items-center gap-2 text-[13px] text-muted">
+            <input
+              type="checkbox"
+              checked={settings.leetcodeAutoSync}
+              onChange={(e) => updateSettings({ leetcodeAutoSync: e.target.checked })}
+            />
+            Auto-sync every few minutes while this site is open
+          </label>
+          {settings.leetcodeLastSyncAt && (
+            <p className="text-xs text-subtle">
+              Last sync: {format(parseISO(settings.leetcodeLastSyncAt), 'MMM d, yyyy HH:mm')}
+            </p>
+          )}
+          <p className="text-[11px] text-subtle">
+            Uses a public LeetCode stats API (no password). Private accounts and problems outside this catalog will not match. True push webhooks are not available without a backend.
+          </p>
         </Section>
 
         <Section

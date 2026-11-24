@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, Bookmark, BookmarkCheck, Check, ChevronLeft, ChevronRight, ExternalLink, Search, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, ExternalLink, Search, X } from 'lucide-react';
 import { sheets } from '../data/sheets';
 import { cfLadders } from '../data/codeforces';
 import { topicMap } from '../data/topics';
@@ -7,10 +7,11 @@ import { useProblemDrawer } from '../context/DrawerContext';
 import { useProgress } from '../context/ProgressContext';
 import type { Problem, ProblemStatus } from '../types';
 import { cn } from '../utils/cn';
+import { getProblemLinks } from '../utils/problemLinks';
 import { DIFFICULTY_ORDER, topicName } from '../utils/stats';
+import { AttemptToggle } from './AttemptToggle';
 import { DifficultyBadge } from './DifficultyBadge';
 import { EmptyState } from './EmptyState';
-import { StatusSelect } from './StatusSelect';
 
 export type FilterKey = 'difficulty' | 'status' | 'topic' | 'platform' | 'sheet' | 'company' | 'rating';
 export type SortKey = 'default' | 'name' | 'difficulty' | 'platform' | 'status' | 'rating';
@@ -66,7 +67,7 @@ export function ProblemTable({
   emptyTitle = 'No problems match these filters',
   searchPlaceholder = 'Search problems…',
 }: ProblemTableProps) {
-  const { progress, toggleBookmark, setStatus } = useProgress();
+  const { progress, toggleBookmark } = useProgress();
   const { open } = useProblemDrawer();
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<TableFilters>({ ...EMPTY_FILTERS, ...initialFilters });
@@ -189,10 +190,9 @@ export function ProblemTable({
         {has('status') && (
           <select className="select !w-auto" value={filters.status} onChange={(e) => setFilter('status', e.target.value)} aria-label="Status">
             <option value="">All statuses</option>
-            <option value="not_started">Not started</option>
+            <option value="not_started">Unattempted</option>
             <option value="attempted">Attempted</option>
-            <option value="solved">Solved</option>
-            <option value="needs_revision">Needs revision</option>
+            <option value="solved">Solved (LeetCode)</option>
             <option value="bookmarked">Bookmarked</option>
           </select>
         )}
@@ -282,7 +282,7 @@ export function ProblemTable({
           <table className="data-table">
             <thead>
               <tr>
-                <th className="sortable w-[150px]" onClick={() => toggleSort('status')}>
+                <th className="sortable w-[200px]" onClick={() => toggleSort('status')}>
                   Status
                   <SortIcon k="status" />
                 </th>
@@ -311,7 +311,7 @@ export function ProblemTable({
             <tbody>
               {rows.map((p) => {
                 const pr = progress[p.id];
-                const solved = pr?.status === 'solved';
+                const links = getProblemLinks(p, pr?.solutionLink);
                 return (
                   <tr
                     key={p.id}
@@ -323,10 +323,23 @@ export function ProblemTable({
                     }}
                   >
                     <td onClick={(e) => e.stopPropagation()}>
-                      <StatusSelect problemId={p.id} />
+                      <AttemptToggle problemId={p.id} />
                     </td>
-                    <td className="max-w-[320px]">
+                    <td className="max-w-[360px]">
                       <div className="truncate font-medium text-fg">{p.name}</div>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5" onClick={(e) => e.stopPropagation()}>
+                        {links.map((link) => (
+                          <a
+                            key={link.label}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] text-link hover:underline"
+                          >
+                            {link.label}
+                          </a>
+                        ))}
+                      </div>
                       {pr?.nextRevisionAt && <div className="mono text-[11px] text-subtle">revise {pr.nextRevisionAt}</div>}
                     </td>
                     <td className="hidden text-muted md:table-cell">{p.platform}</td>
@@ -346,15 +359,6 @@ export function ProblemTable({
                     </td>
                     <td onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-0.5">
-                        <button
-                          type="button"
-                          className={cn('btn btn-ghost btn-icon', solved && 'text-accent')}
-                          title={solved ? 'Mark as not started' : 'Mark as solved'}
-                          aria-label={solved ? 'Mark as not started' : 'Mark as solved'}
-                          onClick={() => setStatus(p.id, solved ? 'not_started' : 'solved')}
-                        >
-                          <Check size={14} />
-                        </button>
                         <button
                           type="button"
                           className={cn('btn btn-ghost btn-icon', pr?.bookmarked && 'text-link')}

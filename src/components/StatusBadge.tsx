@@ -2,7 +2,7 @@ import type { ProblemStatus } from '../types';
 import { cn } from '../utils/cn';
 
 export const STATUS_LABEL: Record<ProblemStatus, string> = {
-  not_started: 'Not started',
+  not_started: 'Unattempted',
   attempted: 'Attempted',
   solved: 'Solved',
   needs_revision: 'Needs revision',

@@ -16,6 +16,8 @@ export const defaultSettings: AppSettings = {
   defaultLanguage: 'C++',
   dailyTarget: 3,
   weeklyTarget: 15,
+  leetcodeUsername: '',
+  leetcodeAutoSync: true,
 };
 
 export const DEFAULT_PROGRESS: ProblemProgress = {
@@ -108,6 +110,9 @@ export function normalizeSettings(raw: unknown): AppSettings {
     defaultLanguage: str(r.defaultLanguage, defaultSettings.defaultLanguage) || defaultSettings.defaultLanguage,
     dailyTarget: Math.max(1, Math.floor(num(r.dailyTarget, defaultSettings.dailyTarget))),
     weeklyTarget: Math.max(1, Math.floor(num(r.weeklyTarget, defaultSettings.weeklyTarget))),
+    leetcodeUsername: str(r.leetcodeUsername).replace(/^@/, '').slice(0, 40),
+    leetcodeAutoSync: r.leetcodeAutoSync !== false,
+    leetcodeLastSyncAt: optStr(r.leetcodeLastSyncAt),
   };
 }
 

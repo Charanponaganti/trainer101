@@ -101,6 +101,12 @@ export interface AppSettings {
   defaultLanguage: string;
   dailyTarget: number;
   weeklyTarget: number;
+  /** Public LeetCode username for solved-problem sync */
+  leetcodeUsername: string;
+  /** Poll LeetCode while the app is open */
+  leetcodeAutoSync: boolean;
+  /** ISO timestamp of last successful sync */
+  leetcodeLastSyncAt?: string;
 }
 
 export interface AppData {
