@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { useProgress } from '../context/ProgressContext';
 import type { RevisionInterval } from '../types';
 import { cn } from '../utils/cn';
@@ -7,67 +8,55 @@ export const REVISION_INTERVALS: RevisionInterval[] = [1, 3, 7, 14, 30];
 interface AttemptToggleProps {
   problemId: string;
   className?: string;
-  /** wider control for drawer */
+  /** show label beside the circle (drawer) */
   block?: boolean;
 }
 
 /**
- * Manual attempt tracking only: Unattempted ↔ Attempted.
- * Solved state comes from LeetCode sync and is shown as a badge.
+ * Click the circle to mark Attempted (green). Click again for Unattempted.
+ * Solved via LeetCode sync stays green with a check.
  */
 export function AttemptToggle({ problemId, className, block }: AttemptToggleProps) {
   const { getProgress, setStatus } = useProgress();
   const { status } = getProgress(problemId);
   const solved = status === 'solved';
-  const attempted = status === 'attempted' || status === 'needs_revision' || solved;
+  const active = status === 'attempted' || status === 'needs_revision' || solved;
 
-  if (solved) {
-    return (
-      <span
-        className={cn(
-          'chip chip-solved inline-flex',
-          block && 'w-full justify-center py-1.5',
-          className,
-        )}
-        title="Marked solved via LeetCode sync"
-      >
-        <span className="chip-dot" />
-        Solved
-      </span>
-    );
-  }
+  const toggle = () => {
+    setStatus(problemId, active ? 'not_started' : 'attempted');
+  };
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        toggle();
+      }}
       className={cn(
-        'inline-flex rounded-md border border-border bg-surface-2 p-0.5 text-[12px]',
+        'group inline-flex items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-accent/40',
         block && 'w-full',
         className,
       )}
-      role="group"
-      aria-label="Attempt status"
-      onClick={(e) => e.stopPropagation()}
+      title={solved ? 'Solved on LeetCode' : active ? 'Mark unattempted' : 'Mark attempted'}
+      aria-label={solved ? 'Solved' : active ? 'Attempted, click to mark unattempted' : 'Unattempted, click to mark attempted'}
+      aria-pressed={active}
     >
-      <button
-        type="button"
+      <span
         className={cn(
-          'flex-1 rounded px-2 py-1 transition-colors',
-          !attempted ? 'bg-surface-3 text-fg' : 'text-subtle hover:text-fg',
+          'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+          active
+            ? 'border-easy bg-easy text-[#04130d]'
+            : 'border-subtle bg-transparent group-hover:border-muted',
         )}
-        onClick={() => setStatus(problemId, 'not_started')}
       >
-        Unattempted
-      </button>
-      <button
-        type="button"
-        className={cn(
-          'flex-1 rounded px-2 py-1 transition-colors',
-          attempted ? 'bg-medium/20 text-medium' : 'text-subtle hover:text-fg',
-        )}
-        onClick={() => setStatus(problemId, 'attempted')}
-      >
-        Attempted
-      </button>
-    </div>
+        {active && <Check size={11} strokeWidth={3} />}
+      </span>
+      {block && (
+        <span className={cn('text-[13px]', active ? 'text-easy' : 'text-subtle')}>
+          {solved ? 'Solved' : active ? 'Attempted' : 'Unattempted'}
+        </span>
+      )}
+    </button>
   );
 }

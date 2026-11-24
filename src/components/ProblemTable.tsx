@@ -282,7 +282,7 @@ export function ProblemTable({
           <table className="data-table">
             <thead>
               <tr>
-                <th className="sortable w-[200px]" onClick={() => toggleSort('status')}>
+                <th className="sortable w-[72px]" onClick={() => toggleSort('status')}>
                   Status
                   <SortIcon k="status" />
                 </th>
