@@ -366,13 +366,22 @@ a {
     vertical-align: middle;
   }
   .data-table tbody tr {
-    transition: background 0.1s;
+    transition: background 0.15s ease;
   }
   .data-table tbody tr.row-click {
     cursor: pointer;
   }
   .data-table tbody tr:hover {
     background: var(--surface-2);
+  }
+  .data-table tbody tr.row-done {
+    background: color-mix(in srgb, var(--easy) 16%, transparent);
+  }
+  .data-table tbody tr.row-done:hover {
+    background: color-mix(in srgb, var(--easy) 24%, transparent);
+  }
+  .data-table tbody tr.row-done td {
+    border-bottom-color: color-mix(in srgb, var(--easy) 18%, var(--border-soft));
   }
   .data-table tbody tr:last-child td {
     border-bottom: none;

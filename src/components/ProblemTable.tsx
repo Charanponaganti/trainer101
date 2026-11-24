@@ -312,10 +312,12 @@ export function ProblemTable({
               {rows.map((p) => {
                 const pr = progress[p.id];
                 const links = getProblemLinks(p, pr?.solutionLink);
+                const done =
+                  pr?.status === 'attempted' || pr?.status === 'solved' || pr?.status === 'needs_revision';
                 return (
                   <tr
                     key={p.id}
-                    className="row-click"
+                    className={cn('row-click', done && 'row-done')}
                     tabIndex={0}
                     onClick={() => open(p.id)}
                     onKeyDown={(e) => {
