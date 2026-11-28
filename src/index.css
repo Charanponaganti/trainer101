@@ -495,3 +495,74 @@ a {
 .anim-pop-in {
   animation: pop-in 0.12s ease-out;
 }
+
+/* ---------- Codeforces Arena ---------- */
+.cf-sync-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, #1e3a5f 22%, var(--surface)) 0%, var(--surface) 55%, color-mix(in srgb, var(--accent) 6%, var(--surface)) 100%);
+  padding: 18px;
+}
+.cf-sync-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: -40% auto auto -10%;
+  width: 55%;
+  height: 120%;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, #3b82f6 18%, transparent), transparent 70%);
+  opacity: 0.9;
+}
+html.light .cf-sync-panel {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, #dbeafe 55%, var(--surface)) 0%, var(--surface) 60%, color-mix(in srgb, var(--accent) 8%, var(--surface)) 100%);
+}
+.cf-stat {
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  padding: 10px 12px;
+  backdrop-filter: blur(6px);
+}
+.cf-set-card,
+.cf-resource-card,
+.cf-rating-cell {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  transition: border-color 0.15s, transform 0.15s, background 0.15s;
+}
+.cf-set-card,
+.cf-resource-card {
+  display: block;
+  padding: 14px;
+}
+.cf-set-card:hover,
+.cf-resource-card:hover {
+  border-color: color-mix(in srgb, var(--link) 45%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 80%, var(--surface));
+  transform: translateY(-1px);
+}
+.cf-rating-cell {
+  padding: 10px 12px;
+}
+.cf-rating-cell:hover {
+  border-color: color-mix(in srgb, var(--link) 40%, var(--border));
+  background: var(--surface-2);
+}
+.cf-rating-cell-active {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+.cf-hero-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 8%, var(--surface)), var(--surface));
+  padding: 14px 16px;
+}

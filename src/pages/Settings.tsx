@@ -25,12 +25,24 @@ function Section({ title, description, children }: { title: string; description?
 }
 
 export function Settings() {
-  const { data, progress, settings, updateSettings, resetProgress, importData, syncLeetCode, leetcodeSyncing } = useProgress();
+  const {
+    data,
+    progress,
+    settings,
+    updateSettings,
+    resetProgress,
+    importData,
+    syncLeetCode,
+    syncCodeforces,
+    leetcodeSyncing,
+    codeforcesSyncing,
+  } = useProgress();
   const fileRef = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState<Notice>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [pendingImport, setPendingImport] = useState<{ data: Parameters<typeof importData>[0]; count: number; name: string } | null>(null);
   const [lcUser, setLcUser] = useState(settings.leetcodeUsername);
+  const [cfHandle, setCfHandle] = useState(settings.codeforcesHandle);
 
   const numberField = (key: 'dailyTarget' | 'weeklyTarget', label: string) => (
     <div>
@@ -166,6 +178,69 @@ export function Settings() {
           )}
           <p className="text-[11px] text-subtle">
             Uses a public LeetCode stats API (no password). Private accounts and problems outside this catalog will not match. True push webhooks are not available without a backend.
+          </p>
+        </Section>
+
+        <Section
+          title="Codeforces sync"
+          description="Link your public Codeforces handle. Accepted submissions that appear in this catalog are marked Solved. You can also sync from the Codeforces Arena page."
+        >
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="min-w-[200px] flex-1">
+              <label className="label" htmlFor="cf-user">
+                Codeforces handle
+              </label>
+              <input
+                id="cf-user"
+                className="input mono"
+                placeholder="your_handle"
+                value={cfHandle}
+                onChange={(e) => setCfHandle(e.target.value)}
+                onBlur={() => updateSettings({ codeforcesHandle: cfHandle.trim().replace(/^@/, '') })}
+              />
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={codeforcesSyncing}
+              onClick={() => {
+                const name = cfHandle.trim().replace(/^@/, '');
+                updateSettings({ codeforcesHandle: name });
+                void syncCodeforces(name).then((r) => setNotice({ tone: r.ok ? 'ok' : 'error', text: r.message }));
+              }}
+            >
+              <RefreshCw size={14} className={codeforcesSyncing ? 'animate-spin' : undefined} />
+              {codeforcesSyncing ? 'Syncing…' : 'Sync now'}
+            </button>
+            <a
+              href={
+                cfHandle.trim()
+                  ? `https://codeforces.com/profile/${encodeURIComponent(cfHandle.trim().replace(/^@/, ''))}`
+                  : 'https://codeforces.com/'
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn"
+            >
+              <Link2 size={14} /> Profile
+            </a>
+          </div>
+          <label className="flex items-center gap-2 text-[13px] text-muted">
+            <input
+              type="checkbox"
+              checked={settings.codeforcesAutoSync}
+              onChange={(e) => updateSettings({ codeforcesAutoSync: e.target.checked })}
+            />
+            Auto-sync every few minutes while this site is open
+          </label>
+          {settings.codeforcesLastSyncAt && (
+            <p className="text-xs text-subtle">
+              Last sync: {format(parseISO(settings.codeforcesLastSyncAt), 'MMM d, yyyy HH:mm')}
+              {settings.codeforcesRating !== undefined ? ` · rating ${settings.codeforcesRating}` : ''}
+            </p>
+          )}
+          <p className="text-[11px] text-subtle">
+            Uses the official Codeforces API (no password). Only problems present in this app’s catalog are marked.
           </p>
         </Section>
 

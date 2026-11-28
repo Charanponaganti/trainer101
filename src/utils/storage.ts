@@ -18,6 +18,8 @@ export const defaultSettings: AppSettings = {
   weeklyTarget: 15,
   leetcodeUsername: '',
   leetcodeAutoSync: true,
+  codeforcesHandle: '',
+  codeforcesAutoSync: true,
 };
 
 export const DEFAULT_PROGRESS: ProblemProgress = {
@@ -113,6 +115,13 @@ export function normalizeSettings(raw: unknown): AppSettings {
     leetcodeUsername: str(r.leetcodeUsername).replace(/^@/, '').slice(0, 40),
     leetcodeAutoSync: r.leetcodeAutoSync !== false,
     leetcodeLastSyncAt: optStr(r.leetcodeLastSyncAt),
+    codeforcesHandle: str(r.codeforcesHandle).replace(/^@/, '').slice(0, 24),
+    codeforcesAutoSync: r.codeforcesAutoSync !== false,
+    codeforcesLastSyncAt: optStr(r.codeforcesLastSyncAt),
+    codeforcesRating: typeof r.codeforcesRating === 'number' && Number.isFinite(r.codeforcesRating) ? r.codeforcesRating : undefined,
+    codeforcesMaxRating:
+      typeof r.codeforcesMaxRating === 'number' && Number.isFinite(r.codeforcesMaxRating) ? r.codeforcesMaxRating : undefined,
+    codeforcesRank: optStr(r.codeforcesRank),
   };
 }
 

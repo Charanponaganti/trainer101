@@ -55,6 +55,7 @@ export interface CfResource {
   name: string;
   description: string;
   url: string;
+  category?: 'course' | 'sheet' | 'blog' | 'book' | 'tool' | 'editorial';
 }
 
 export interface CfLadder {
@@ -63,6 +64,22 @@ export interface CfLadder {
   description: string;
   minRating: number;
   maxRating: number;
+  problemIds: string[];
+}
+
+export type CfSetKind = 'ladder' | 'cp31' | 'topic' | 'classic';
+
+export interface CfProblemSet {
+  id: string;
+  name: string;
+  description: string;
+  kind: CfSetKind;
+  /** Optional source / author credit */
+  source?: string;
+  /** External reference URL */
+  url?: string;
+  minRating?: number;
+  maxRating?: number;
   problemIds: string[];
 }
 
@@ -107,6 +124,18 @@ export interface AppSettings {
   leetcodeAutoSync: boolean;
   /** ISO timestamp of last successful sync */
   leetcodeLastSyncAt?: string;
+  /** Public Codeforces handle for solved-problem sync */
+  codeforcesHandle: string;
+  /** Poll Codeforces while the app is open */
+  codeforcesAutoSync: boolean;
+  /** ISO timestamp of last successful CF sync */
+  codeforcesLastSyncAt?: string;
+  /** Cached CF rating from last sync */
+  codeforcesRating?: number;
+  /** Cached CF max rating from last sync */
+  codeforcesMaxRating?: number;
+  /** Cached CF rank title from last sync */
+  codeforcesRank?: string;
 }
 
 export interface AppData {

@@ -114,6 +114,63 @@ const sheetMeta: SheetMeta[] = [
     author: 'Antti Laaksonen',
     category: 'cp',
   },
+  {
+    id: 'cp31',
+    name: 'CP-31 Sheet (TLE Eliminators)',
+    description:
+      '372 hand-picked Codeforces problems — 31 per rating from 800 to 1900 — curated by Priyansh Agarwal. Open the Codeforces Arena for rating-wise breakdowns.',
+    url: 'https://www.tle-eliminators.com/cp-sheet',
+    author: 'Priyansh Agarwal / TLE Eliminators',
+    category: 'cp',
+  },
+  {
+    id: 'cf-beginner',
+    name: 'CF Ladder · Beginner (800–1000)',
+    description: 'Popular Codeforces problems in the 800–1000 band for building speed and contest confidence.',
+    url: 'https://codeforces.com/problemset?tags=800-1000',
+    author: 'Codeforces community',
+    category: 'cp',
+  },
+  {
+    id: 'cf-fundamentals',
+    name: 'CF Ladder · Fundamentals (1000–1200)',
+    description: 'Sorting, greedy, binary search and two-pointer fundamentals on Codeforces.',
+    url: 'https://codeforces.com/problemset?tags=1000-1200',
+    author: 'Codeforces community',
+    category: 'cp',
+  },
+  {
+    id: 'cf-intermediate',
+    name: 'CF Ladder · Intermediate (1200–1400)',
+    description: 'Constructive, greedy proofs, and intro DP / graphs for climbing toward Specialist.',
+    url: 'https://codeforces.com/problemset?tags=1200-1400',
+    author: 'Codeforces community',
+    category: 'cp',
+  },
+  {
+    id: 'cf-upper-intermediate',
+    name: 'CF Ladder · Upper Intermediate (1400–1600)',
+    description: 'Stronger DP, number theory and graph problems for Expert-bound training.',
+    url: 'https://codeforces.com/problemset?tags=1400-1600',
+    author: 'Codeforces community',
+    category: 'cp',
+  },
+  {
+    id: 'cf-advanced',
+    name: 'CF Ladder · Advanced (1600–1800)',
+    description: 'DSU, trees, shortest paths and harder DP — Candidate Master prep territory.',
+    url: 'https://codeforces.com/problemset?tags=1600-1800',
+    author: 'Codeforces community',
+    category: 'cp',
+  },
+  {
+    id: 'cf-expert',
+    name: 'CF Ladder · Expert (1800+)',
+    description: 'Harder structures, trees and advanced DP for late Expert / early CM practice.',
+    url: 'https://codeforces.com/problemset?tags=1800-3500',
+    author: 'Codeforces community',
+    category: 'cp',
+  },
 ];
 
 const bySheet = new Map<string, string[]>();

@@ -1,0 +1,123 @@
+{
+  "generatedAt": "2026-11-28T12:07:51.418Z",
+  "totalProblems": 814,
+  "cp31Ratings": [
+    800,
+    900,
+    1000,
+    1100,
+    1200,
+    1300,
+    1400,
+    1500,
+    1600,
+    1700,
+    1800,
+    1900
+  ],
+  "unmatchedCp31": [],
+  "topicSpecs": [
+    {
+      "id": "cf-topic-greedy",
+      "label": "Greedy",
+      "tag": "greedy"
+    },
+    {
+      "id": "cf-topic-dp",
+      "label": "Dynamic Programming",
+      "tag": "dp"
+    },
+    {
+      "id": "cf-topic-binary-search",
+      "label": "Binary Search",
+      "tag": "binary search"
+    },
+    {
+      "id": "cf-topic-graphs",
+      "label": "Graphs",
+      "tag": "graphs"
+    },
+    {
+      "id": "cf-topic-trees",
+      "label": "Trees",
+      "tag": "trees"
+    },
+    {
+      "id": "cf-topic-math",
+      "label": "Math",
+      "tag": "math"
+    },
+    {
+      "id": "cf-topic-number-theory",
+      "label": "Number Theory",
+      "tag": "number theory"
+    },
+    {
+      "id": "cf-topic-strings",
+      "label": "Strings",
+      "tag": "strings"
+    },
+    {
+      "id": "cf-topic-dsu",
+      "label": "DSU",
+      "tag": "dsu"
+    },
+    {
+      "id": "cf-topic-bitmasks",
+      "label": "Bitmasks",
+      "tag": "bitmasks"
+    },
+    {
+      "id": "cf-topic-two-pointers",
+      "label": "Two Pointers",
+      "tag": "two pointers"
+    },
+    {
+      "id": "cf-topic-constructive",
+      "label": "Constructive",
+      "tag": "constructive algorithms"
+    },
+    {
+      "id": "cf-topic-shortest-paths",
+      "label": "Shortest Paths",
+      "tag": "shortest paths"
+    },
+    {
+      "id": "cf-topic-data-structures",
+      "label": "Data Structures",
+      "tag": "data structures"
+    }
+  ],
+  "ladderBands": [
+    {
+      "id": "cf-beginner",
+      "minRating": 800,
+      "maxRating": 1000
+    },
+    {
+      "id": "cf-fundamentals",
+      "minRating": 1000,
+      "maxRating": 1200
+    },
+    {
+      "id": "cf-intermediate",
+      "minRating": 1200,
+      "maxRating": 1400
+    },
+    {
+      "id": "cf-upper-intermediate",
+      "minRating": 1400,
+      "maxRating": 1600
+    },
+    {
+      "id": "cf-advanced",
+      "minRating": 1600,
+      "maxRating": 1800
+    },
+    {
+      "id": "cf-expert",
+      "minRating": 1800,
+      "maxRating": 3500
+    }
+  ]
+}

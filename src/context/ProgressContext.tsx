@@ -8,6 +8,7 @@ import type {
   ProblemStatus,
   RevisionInterval,
 } from '../types';
+import { fetchCodeforcesSolved } from '../utils/codeforcesSync';
 import { fetchLeetCodeSolved } from '../utils/leetcodeSync';
 import { clearStoredData, createDefaultData, DEFAULT_PROGRESS, loadData, normalizeData, saveData } from '../utils/storage';
 import { addDaysStr, todayStr } from '../utils/stats';
@@ -35,12 +36,19 @@ export interface SyncLeetCodeResult {
   matchedCount?: number;
 }
 
+export interface SyncCodeforcesResult {
+  ok: boolean;
+  message: string;
+  matchedCount?: number;
+}
+
 interface ProgressContextValue {
   data: AppData;
   progress: Record<string, ProblemProgress>;
   settings: AppSettings;
   planner: Record<string, PlannerEntry>;
   leetcodeSyncing: boolean;
+  codeforcesSyncing: boolean;
   getProgress: (id: string) => ProblemProgress;
   updateProgress: (id: string, patch: Partial<ProblemProgress>) => void;
   setStatus: (id: string, status: ProblemStatus, options?: SetStatusOptions) => void;
@@ -54,6 +62,7 @@ interface ProgressContextValue {
   resetProgress: () => void;
   importData: (data: AppData) => boolean;
   syncLeetCode: (usernameOverride?: string) => Promise<SyncLeetCodeResult>;
+  syncCodeforces: (handleOverride?: string) => Promise<SyncCodeforcesResult>;
 }
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
@@ -93,7 +102,9 @@ const AUTO_SYNC_MS = 3 * 60 * 1000;
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(() => loadData());
   const [leetcodeSyncing, setLeetcodeSyncing] = useState(false);
-  const syncingRef = useRef(false);
+  const [codeforcesSyncing, setCodeforcesSyncing] = useState(false);
+  const lcSyncingRef = useRef(false);
+  const cfSyncingRef = useRef(false);
   const settingsRef = useRef(data.settings);
   settingsRef.current = data.settings;
 
@@ -196,12 +207,35 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     return true;
   }, []);
 
+  const applySolvedIds = (progress: Record<string, ProblemProgress>, ids: string[], now: string, today: string) => {
+    const next = { ...progress };
+    for (const id of ids) {
+      const prev = base(next[id]);
+      if (prev.status === 'solved') {
+        next[id] = {
+          ...prev,
+          lastSolvedAt: prev.lastSolvedAt ?? now,
+          solvedDates: prev.solvedDates.includes(today) ? prev.solvedDates : [...prev.solvedDates, today],
+        };
+        continue;
+      }
+      next[id] = {
+        ...prev,
+        status: 'solved',
+        lastSolvedAt: now,
+        lastAttemptedAt: now,
+        solvedDates: prev.solvedDates.includes(today) ? prev.solvedDates : [...prev.solvedDates, today],
+      };
+    }
+    return next;
+  };
+
   const syncLeetCode = useCallback(async (usernameOverride?: string): Promise<SyncLeetCodeResult> => {
-    if (syncingRef.current) return { ok: false, message: 'Sync already running.' };
+    if (lcSyncingRef.current) return { ok: false, message: 'Sync already running.' };
     const username = (usernameOverride ?? settingsRef.current.leetcodeUsername).trim();
     if (!username) return { ok: false, message: 'Add your LeetCode username in Settings first.' };
 
-    syncingRef.current = true;
+    lcSyncingRef.current = true;
     setLeetcodeSyncing(true);
     try {
       const result = await fetchLeetCodeSolved(username);
@@ -209,36 +243,15 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
       const today = todayStr();
       const now = new Date().toISOString();
-      setData((d) => {
-        const progress = { ...d.progress };
-        for (const id of result.matchedIds) {
-          const prev = base(progress[id]);
-          if (prev.status === 'solved') {
-            progress[id] = {
-              ...prev,
-              lastSolvedAt: prev.lastSolvedAt ?? now,
-              solvedDates: prev.solvedDates.includes(today) ? prev.solvedDates : [...prev.solvedDates, today],
-            };
-            continue;
-          }
-          progress[id] = {
-            ...prev,
-            status: 'solved',
-            lastSolvedAt: now,
-            lastAttemptedAt: now,
-            solvedDates: prev.solvedDates.includes(today) ? prev.solvedDates : [...prev.solvedDates, today],
-          };
-        }
-        return {
-          ...d,
-          progress,
-          settings: {
-            ...d.settings,
-            leetcodeUsername: result.username,
-            leetcodeLastSyncAt: now,
-          },
-        };
-      });
+      setData((d) => ({
+        ...d,
+        progress: applySolvedIds(d.progress, result.matchedIds, now, today),
+        settings: {
+          ...d.settings,
+          leetcodeUsername: result.username,
+          leetcodeLastSyncAt: now,
+        },
+      }));
 
       return {
         ok: true,
@@ -248,8 +261,48 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     } catch {
       return { ok: false, message: 'Sync failed. Check your network and try again.' };
     } finally {
-      syncingRef.current = false;
+      lcSyncingRef.current = false;
       setLeetcodeSyncing(false);
+    }
+  }, []);
+
+  const syncCodeforces = useCallback(async (handleOverride?: string): Promise<SyncCodeforcesResult> => {
+    if (cfSyncingRef.current) return { ok: false, message: 'Sync already running.' };
+    const handle = (handleOverride ?? settingsRef.current.codeforcesHandle).trim();
+    if (!handle) return { ok: false, message: 'Add your Codeforces handle in Settings or on this page first.' };
+
+    cfSyncingRef.current = true;
+    setCodeforcesSyncing(true);
+    try {
+      const result = await fetchCodeforcesSolved(handle);
+      if (!result.ok) return { ok: false, message: result.error };
+
+      const today = todayStr();
+      const now = new Date().toISOString();
+      setData((d) => ({
+        ...d,
+        progress: applySolvedIds(d.progress, result.matchedIds, now, today),
+        settings: {
+          ...d.settings,
+          codeforcesHandle: result.handle,
+          codeforcesLastSyncAt: now,
+          codeforcesRating: result.rating,
+          codeforcesMaxRating: result.maxRating,
+          codeforcesRank: result.rank,
+        },
+      }));
+
+      const ratingBit = result.rating !== undefined ? ` · rating ${result.rating}` : '';
+      return {
+        ok: true,
+        message: `Synced ${result.matchedCount} catalog problem${result.matchedCount === 1 ? '' : 's'} from @${result.handle} (${result.fetchedCount} unique ACs)${ratingBit}.`,
+        matchedCount: result.matchedCount,
+      };
+    } catch {
+      return { ok: false, message: 'Codeforces sync failed. Check your network and try again.' };
+    } finally {
+      cfSyncingRef.current = false;
+      setCodeforcesSyncing(false);
     }
   }, []);
 
@@ -271,6 +324,22 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.settings.leetcodeUsername, data.settings.leetcodeAutoSync, syncLeetCode]);
 
+  useEffect(() => {
+    const handle = data.settings.codeforcesHandle.trim();
+    if (!handle || !data.settings.codeforcesAutoSync) return;
+
+    const run = () => {
+      void syncCodeforces(handle);
+    };
+
+    const last = data.settings.codeforcesLastSyncAt ? Date.parse(data.settings.codeforcesLastSyncAt) : 0;
+    if (!last || Date.now() - last > AUTO_SYNC_MS) run();
+
+    const id = window.setInterval(run, AUTO_SYNC_MS);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.settings.codeforcesHandle, data.settings.codeforcesAutoSync, syncCodeforces]);
+
   const value = useMemo<ProgressContextValue>(
     () => ({
       data,
@@ -278,6 +347,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       settings: data.settings,
       planner: data.planner,
       leetcodeSyncing,
+      codeforcesSyncing,
       getProgress,
       updateProgress,
       setStatus,
@@ -291,10 +361,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       resetProgress,
       importData,
       syncLeetCode,
+      syncCodeforces,
     }),
     [
       data,
       leetcodeSyncing,
+      codeforcesSyncing,
       getProgress,
       updateProgress,
       setStatus,
@@ -308,6 +380,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       resetProgress,
       importData,
       syncLeetCode,
+      syncCodeforces,
     ],
   );
 
